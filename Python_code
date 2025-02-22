@@ -1,0 +1,172 @@
+import matplotlib.pyplot as plt
+from scipy import stats
+from scipy import linalg
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv('Project.csv') 
+
+# Defines variables
+X = df[['Employment %', 'Without Health Insurance %', 'Non-English %', '65 Plus %', 'Cases - Cumulative', 
+        'Case Rate - Cumulative', 'Tests - Cumulative', 'Test Rate - Cumulative', 'Positive Tests % - Cumulative']]  
+y = df['Death Rate - Cumulative'] 
+
+# Standardizes predictors to for VIF calculation
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Computes the VIF for each predictor
+# Creates a DataFrame for the VIFs
+vif_data = pd.DataFrame()
+vif_data['Variable'] = X.columns
+vif_data['VIF'] = [variance_inflation_factor(X_scaled, i) for i in range(X_scaled.shape[1])]
+
+# Displays the VIF values
+print("VIF for each predictor:")
+print(vif_data)
+# Removed Cases - Cumulative, Tests - Cumulative, and Test Rate - Cumulative since VIF is over 10.  
+# Removed Case Rate - Cumulative since VIF was close to 10.
+
+# Splits data into training and testing sets (50% train, 50% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Train the Linear Regression Model
+model = LinearRegression()
+results = model.fit(X_train, y_train)
+
+# Predicts on the test set
+y_pred = model.predict(X_test)
+
+# Evaluates Performance
+# Mean Squared Error (MSE)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Mean Squared Error: {mse}')
+
+# Adds a constant to the predictor matrix
+X_train_sm = sm.add_constant(X_train)
+model_sm = sm.OLS(y_train, X_train_sm)
+results = model_sm.fit()
+print(results.summary())
+
+#____________________________________
+
+from numpy import array
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error
+
+# Defines variables
+X = df[['Employment %', 'Without Health Insurance %', 'Non-English %', '65 Plus %', 'Cases - Cumulative', 
+        'Case Rate - Cumulative', 'Tests - Cumulative', 'Test Rate - Cumulative', 'Positive Tests % - Cumulative']]  
+Y = df['Death Rate - Cumulative'] 
+
+# Initializes the Lasso model
+lasso_model = Lasso(alpha=0.1) 
+lasso_model.fit(X_train, y_train)
+
+# Makes predictions on the training data
+y_pred_train_lasso = lasso_model.predict(X_train)
+
+# Calculates Mean Squared Error (MSE) for the training data
+mse_train_lasso = mean_squared_error(y_train, y_pred_train_lasso)
+
+# Results for predictor reduction
+print(f'Lasso Regression Coefficients: {lasso_model.coef_}')
+#No predictors were removed from the model.
+
+# Makes predictions and calculates MSE on testing data
+y_pred_test_lasso = lasso_model.predict(X_test)
+mse_test_lasso = mean_squared_error(y_test, y_pred_test_lasso)
+
+print(f'Mean Squared Error for Training Data (Lasso): {mse_train_lasso}')
+print(f'Mean Squared Error for Testing Data (Lasso): {mse_test_lasso}')
+
+#______________________________________
+
+import matplotlib.pyplot as plt
+from scipy import stats
+from scipy import linalg
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+df = pd.read_csv('Project.csv') 
+
+# Defines variables
+X = df[['Without Health Insurance %', 'Non-English %', '65 Plus %', 'Employment %', 'Positive Tests % - Cumulative']]  
+y = df['Death Rate - Cumulative'] 
+
+# Standardizes predictors to for VIF calculation
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Computes the VIF for each predictor
+# Creates a DataFrame for the VIFs
+vif_data = pd.DataFrame()
+vif_data['Variable'] = X.columns
+vif_data['VIF'] = [variance_inflation_factor(X_scaled, i) for i in range(X_scaled.shape[1])]
+
+# Displays the VIF values
+print("VIF for each predictor:")
+print(vif_data)
+# Remove Cases - Cumulative, Tests - Cumulative, and Test Rate - Cumulative since VIF is over 10
+
+# Splits data into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the Linear Regression Model
+model = LinearRegression()
+results = model.fit(X_train, y_train)
+
+# Predicts on the test set
+y_pred = model.predict(X_test)
+
+# Evaluates Performance
+# Mean Squared Error (MSE)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Mean Squared Error: {mse}')
+
+# Adds a constant to the predictor matrix
+X_train_sm = sm.add_constant(X_train)
+model_sm = sm.OLS(y_train, X_train_sm)
+results = model_sm.fit()
+print(results.summary())
+
+#___________________________________
+
+from numpy import array
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error
+
+# Defines variables
+X = df[['Without Health Insurance %', 'Non-English %', '65 Plus %', 'Employment %', 'Positive Tests % - Cumulative']]  
+y = df['Death Rate - Cumulative'] 
+
+# Initializes the Lasso model
+lasso_model = Lasso(alpha=0.1) 
+lasso_model.fit(X_train, y_train)
+
+# Makes predictions on the training data
+y_pred_train_lasso = lasso_model.predict(X_train)
+
+# Calculates Mean Squared Error (MSE) for the training data
+mse_train_lasso = mean_squared_error(y_train, y_pred_train_lasso)
+
+# Results for predictor reduction
+print(f'Lasso Regression Coefficients: {lasso_model.coef_}')
+#No predictors were removed from the model.
+
+# Makes predictions and calculates MSE on testing data
+y_pred_test_lasso = lasso_model.predict(X_test)
+mse_test_lasso = mean_squared_error(y_test, y_pred_test_lasso)
+
+print(f'Mean Squared Error for Training Data (Lasso): {mse_train_lasso}')
+print(f'Mean Squared Error for Testing Data (Lasso): {mse_test_lasso}')
